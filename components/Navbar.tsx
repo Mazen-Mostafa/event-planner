@@ -1,11 +1,8 @@
 "use client";
-
-import { logout } from "@/lib/auth-actions";
-import { Session } from "next-auth";
 import Link from "next/link";
 import { useState } from "react";
 
-export default function Navbar({ session }: { session: Session | null }) {
+export default function Navbar() {
   const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
   return (
     <nav className="bg-slate-800 border-b border-slate-700 shadow-lg">
@@ -23,39 +20,20 @@ export default function Navbar({ session }: { session: Session | null }) {
             >
               Events
             </Link>
-            {session ? (
-              <>
-                <Link
-                  href="/events/create"
-                  className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Create Event
-                </Link>
-                <Link
-                  href="/dashboard"
-                  className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <div className="flex items-center space-x-2">
-                  <button
-                    onClick={logout}
-                    className="bg-primary text-background px-4 py-2 rounded-md cursor-pointer text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Logout
-                  </button>
-                </div>
-              </>
-            ) : (
-              <div className="flex items-center space-x-2">
-                <Link
-                  href="/login"
-                  className="bg-primary text-background px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-                >
-                  Sign in with Github
-                </Link>
-              </div>
-            )}
+            <>
+              <Link
+                href="/events/create"
+                className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Create Event
+              </Link>
+              <Link
+                href="/dashboard"
+                className="text-foreground hover:text-primary px-3 py-2 rounded-md text-sm font-medium transition-colors"
+              >
+                Dashboard
+              </Link>
+            </>
           </div>
 
           <div className="md:hidden flex items-center">
@@ -102,25 +80,6 @@ export default function Navbar({ session }: { session: Session | null }) {
               >
                 Dashboard
               </Link>
-              <div className="flex items-center space-x-2">
-                {session ? (
-                  <div className="flex items-center space-x-2">
-                    <button
-                      onClick={logout}
-                      className="bg-primary text-background px-4 py-2 rounded-md cursor-pointer text-sm font-medium hover:bg-primary/90 transition-colors"
-                    >
-                      Logout
-                    </button>
-                  </div>
-                ) : (
-                  <Link
-                    href="/login"
-                    className="bg-primary text-background px-4 py-2 rounded-md text-sm font-medium hover:bg-primary/90 transition-colors"
-                  >
-                    Sign in with Github
-                  </Link>
-                )}
-              </div>
             </div>
           </div>
         )}

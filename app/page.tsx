@@ -1,9 +1,6 @@
 import Link from "next/link";
-import { auth } from "../auth";
 
 export default async function HomePage() {
-  const session = await auth();
-
   return (
     <div className="space-y-12">
       {/* Hero Section */}
@@ -16,28 +13,17 @@ export default async function HomePage() {
           we&apos;ve got everything you need to make your event a success.
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
-          {session ? (
-            <>
-              <Link
-                href="/events/create"
-                className="btn-primary text-lg px-8 py-3"
-              >
-                Create Event
-              </Link>
-              <Link href="/events" className="btn-secondary text-lg px-8 py-3">
-                Browse Events
-              </Link>
-            </>
-          ) : (
-            <>
-              <Link href="/login" className="btn-primary text-lg px-8 py-3">
-                Get Started with GitHub
-              </Link>
-              <Link href="/events" className="btn-secondary text-lg px-8 py-3">
-                Browse Events
-              </Link>
-            </>
-          )}
+          <>
+            <Link
+              href="/events/create"
+              className="btn-primary text-lg px-8 py-3"
+            >
+              Create Event
+            </Link>
+            <Link href="/events" className="btn-secondary text-lg px-8 py-3">
+              Browse Events
+            </Link>
+          </>
         </div>
       </section>
 

@@ -1,53 +1,46 @@
-import { auth } from "@/auth";
-import { Event, EventRSVP } from "@/lib/models";
+import { EventRSVP } from "@/lib/models";
+import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
-import { redirect } from "next/navigation";
+import { connection } from "next/server";
 
 export default async function DashboardPage() {
-  const session = await auth();
+  await connection();
 
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const userRSVPsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/dashboard/rsvps`,
-    {
-      next: { tags: ["rsvps"] },
-    }
-  );
-
-  const userRSVPs: EventRSVP[] = userRSVPsRes.ok
-    ? await userRSVPsRes.json()
-    : [];
-
-  const userEventsRes = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/dashboard/events`,
-    {
-      next: { tags: ["events"] },
-    }
-  );
-
-  const userEvents: Event[] = userEventsRes.ok
-    ? await userEventsRes.json()
-    : [];
+  const [userEvents, userRSVPs] = await Promise.all([
+    prisma.event.findMany({
+      include: {
+        _count: {
+          select: { rsvps: true },
+        },
+      },
+      orderBy: { date: "asc" },
+    }),
+    prisma.rSVP.findMany({
+      include: {
+        event: {
+          include: {
+            user: {
+              select: { name: true },
+            },
+          },
+        },
+      },
+      orderBy: { event: { date: "asc" } },
+    }),
+  ]);
 
   const now = new Date();
   const upcomingEvents = userEvents.filter(
-    (event: Event) => new Date(event.date) >= now
+    (event) => new Date(event.date) >= now
   );
-  const pastEvents = userEvents.filter(
-    (event: Event) => new Date(event.date) < now
-  );
+  const pastEvents = userEvents.filter((event) => new Date(event.date) < now);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted mt-2">
-          Welcome back, {session.user.name || session.user.email}
-        </p>
+        <p className="text-muted mt-2">Overview of events and RSVPs in your database</p>
       </div>
 
       {/* Quick Actions */}
@@ -86,15 +79,15 @@ export default async function DashboardPage() {
           <p className="text-3xl font-bold text-primary">{pastEvents.length}</p>
         </div>
         <div className="card p-6">
-          <h3 className="text-lg font-semibold text-foreground">My RSVPs</h3>
+          <h3 className="text-lg font-semibold text-foreground">RSVPs</h3>
           <p className="text-3xl font-bold text-primary">{userRSVPs.length}</p>
         </div>
       </div>
 
-      {/* My Events */}
+      {/* Events */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-2xl font-bold text-foreground">My Events</h2>
+          <h2 className="text-2xl font-bold text-foreground">Events</h2>
           <Link
             href={"/events/create"}
             className="text-primary hover:text-primary/80 transition-colors"
@@ -146,26 +139,29 @@ export default async function DashboardPage() {
                     {event._count.rsvps} RSVPs
                   </div>
                 </div>
+                <Link
+                  href={`/events/${event.id}`}
+                  className="btn-primary w-full text-center"
+                >
+                  View Event
+                </Link>
               </div>
             ))}
           </div>
         ) : (
           <div className="card p-8 text-center">
-            <p className="text-muted">
-              {" "}
-              You haven&apos;t created any events yet.
-            </p>
+            <p className="text-muted">No events in the database yet.</p>
           </div>
         )}
       </div>
 
-      {/* My RSVPs */}
+      {/* RSVPs */}
       <div className="space-y-4">
-        <h2 className="text-2xl font-bold text-foreground">My RSVPs</h2>
+        <h2 className="text-2xl font-bold text-foreground">RSVPs</h2>
 
         {userRSVPs.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userRSVPs.map((rsvp, key) => (
+            {(userRSVPs as unknown as EventRSVP[]).map((rsvp, key) => (
               <div className="card p-6" key={key}>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   {rsvp.event?.title}
@@ -175,8 +171,8 @@ export default async function DashboardPage() {
                     rsvp.status === "GOING"
                       ? "bg-green-600/20 text-green-400"
                       : rsvp.status === "MAYBE"
-                      ? "bg-yellow-600/20 text-yellow-400"
-                      : "bg-red-600/20 text-red-400"
+                        ? "bg-yellow-600/20 text-yellow-400"
+                        : "bg-red-600/20 text-red-400"
                   }`}
                 >
                   {rsvp.status}
@@ -230,10 +226,7 @@ export default async function DashboardPage() {
           </div>
         ) : (
           <div className="card p-8 text-center">
-            <p className="text-muted">
-              {" "}
-              You haven&apos;t RSVP&apos;d to any events yet.
-            </p>
+            <p className="text-muted">No RSVPs in the database yet.</p>
           </div>
         )}
       </div>

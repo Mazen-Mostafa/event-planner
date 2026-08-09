@@ -1,40 +1,48 @@
-import { auth } from "@/auth";
 import EventActions from "@/components/EventActions";
 import RSVPButtons from "@/components/RSVPButtons";
+import { getAppUser } from "@/lib/app-user";
 import { Event, RSVPStatus } from "@/lib/models";
+import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { connection } from "next/server";
 
 export default async function EventPage({
   params,
 }: {
   params: Promise<{ eventId: string }>;
 }) {
+  await connection();
   const { eventId } = await params;
+  const appUser = await getAppUser();
 
-  const session = await auth();
+  const eventRecord = await prisma.event.findUnique({
+    where: { id: eventId },
+    include: {
+      user: { select: { name: true, email: true } },
+      rsvps: {
+        include: {
+          user: {
+            select: { name: true, email: true },
+          },
+        },
+      },
+      _count: {
+        select: { rsvps: true },
+      },
+    },
+  });
 
-  const eventResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/events/${eventId}`,
-    { next: { tags: [`event-${eventId}`] } }
-  );
-
-  if (!eventResponse.ok) {
+  if (!eventRecord) {
     notFound();
   }
 
-  const event = (await eventResponse.json()) as Event;
+  const event = eventRecord as Event;
 
-  let currentRSVP: RSVPStatus | undefined;
-  if (session?.user?.id) {
-    const userRSVP = event.rsvps.find(
-      (rsvp) => rsvp.userId === session.user?.id
-    );
-    currentRSVP = userRSVP?.status;
-  }
+  const userRSVP = event.rsvps.find((rsvp) => rsvp.userId === appUser.id);
+  const currentRSVP: RSVPStatus | undefined = userRSVP?.status;
 
-  const isOwner = session?.user?.id === event.userId;
   const isPast = new Date(event.date) < new Date();
 
   const goingRSVPs = event.rsvps.filter((rsvp) => rsvp.status == "GOING");
@@ -55,7 +63,7 @@ export default async function EventPage({
             <p className="text-xl text-muted mb-6">{event.description}</p>
           </div>
 
-          {isOwner && <EventActions eventId={event.id} />}
+          <EventActions eventId={event.id} />
         </div>
 
         <div className="grid md:grid-cols-2 gap-8">
@@ -151,7 +159,7 @@ export default async function EventPage({
             )}
           </div>
 
-          {!isPast && event.isPublic && session && (
+          {!isPast && event.isPublic && (
             <RSVPButtons eventId={event.id} currentRSVP={currentRSVP} />
           )}
 

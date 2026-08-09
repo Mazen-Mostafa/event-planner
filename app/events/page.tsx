@@ -1,24 +1,45 @@
-import { auth } from "@/auth";
 import EventsList from "@/components/EventsList";
+import { Event } from "@/lib/models";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
+import { connection } from "next/server";
 
 export default async function EventsPage({
   searchParams,
 }: {
   searchParams: Promise<{ search?: string; filter?: string }>;
 }) {
-  const session = await auth();
+  await connection();
   const sp = await searchParams;
 
-  const params = new URLSearchParams();
-  if (sp.search) params.set("search", sp.search);
-  if (sp.filter) params.set("filter", sp.filter);
+  const where: {
+    OR?: Array<
+      | { title: { contains: string; mode: "insensitive" } }
+      | { description: { contains: string; mode: "insensitive" } }
+      | { location: { contains: string; mode: "insensitive" } }
+    >;
+    date?: { gte: Date } | { lt: Date };
+  } = {};
 
-  const eventsResponse = await fetch(
-    `${process.env.NEXT_PUBLIC_APP_URL}/api/events?${params.toString()}`,
-    { next: { tags: ["events"] } }
-  );
-  const events = eventsResponse.ok ? await eventsResponse.json() : [];
+  if (sp.search) {
+    where.OR = [
+      { title: { contains: sp.search, mode: "insensitive" } },
+      { description: { contains: sp.search, mode: "insensitive" } },
+      { location: { contains: sp.search, mode: "insensitive" } },
+    ];
+  }
+
+  if (sp.filter === "upcoming") {
+    where.date = { gte: new Date() };
+  } else if (sp.filter === "past") {
+    where.date = { lt: new Date() };
+  }
+
+  const events = await prisma.event.findMany({
+    where,
+    include: { user: { select: { name: true, email: true } } },
+    orderBy: { date: "asc" },
+  });
 
   return (
     <div className="space-y-8">
@@ -29,18 +50,12 @@ export default async function EventsPage({
             Discover and join amazing events in your area
           </p>
         </div>
-        {session && (
-          <Link href="/events/create" className="btn-primary">
-            Create Event
-          </Link>
-        )}
+        <Link href="/events/create" className="btn-primary">
+          Create Event
+        </Link>
       </div>
 
-      <EventsList
-        events={events}
-        searchParams={sp}
-        isAuthenticated={!!session}
-      />
+      <EventsList events={events as unknown as Event[]} searchParams={sp} />
     </div>
   );
 }

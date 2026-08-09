@@ -1,36 +1,36 @@
-# Event Planner Full-Stack Project
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-Build a complete full-stack event planning application with authentication, database integration, and deployment.
+## Getting Started
 
-## What You'll Build
+First, run the development server:
 
-A comprehensive event management platform featuring:
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-- **User Authentication**: Sign up, login, and session management
-- **Event Management**: Create, edit, delete, and view events
-- **RSVP System**: Users can RSVP to events
-- **Dashboard**: Personal dashboard with user's events and RSVPs
-- **Filtering & Search**: Find events by category and location
-- **Responsive Design**: Mobile-friendly interface
-- **Database Integration**: PostgreSQL with Supabase
-- **Deployment**: Live application on Vercel
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-## Key Learning Objectives
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-- **Full-Stack Development**: Complete application with frontend and backend
-- **Authentication**: User management and session handling
-- **Database Design**: Schema design and relationships
-- **Server Actions**: Form handling and data mutations
-- **Real-World Patterns**: Production-ready code structure
-- **Deployment**: Going from development to production
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-## Technologies Used
+## Learn More
 
-- Next.js App Router
-- TypeScript
-- TailwindCSS
-- Supabase (PostgreSQL)
-- AuthJS (NextAuth)
-- Vercel (Deployment)
+To learn more about Next.js, take a look at the following resources:
 
-This project demonstrates how to build a production-ready full-stack application using modern Next.js patterns and best practices.
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.

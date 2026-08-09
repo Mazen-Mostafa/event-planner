@@ -1,13 +1,9 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await auth();
-
-    const userEvents = await prisma.event.findMany({
-      where: { userId: session?.user?.id },
+    const events = await prisma.event.findMany({
       include: {
         _count: {
           select: { rsvps: true },
@@ -16,11 +12,11 @@ export async function GET() {
       orderBy: { date: "asc" },
     });
 
-    return NextResponse.json(userEvents);
+    return NextResponse.json(events);
   } catch (err) {
     console.error(err);
     return NextResponse.json(
-      { error: "Failed to fetch user events" },
+      { error: "Failed to fetch events" },
       { status: 500 }
     );
   }

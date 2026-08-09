@@ -8,14 +8,9 @@ import { useRouter } from "next/navigation";
 interface EventsListProps {
   events: Event[];
   searchParams: { search?: string; filter?: string };
-  isAuthenticated: boolean;
 }
 
-export default function EventsList({
-  events,
-  searchParams,
-  isAuthenticated,
-}: EventsListProps) {
+export default function EventsList({ events, searchParams }: EventsListProps) {
   const router = useRouter();
 
   function handleSearch(e: React.FormEvent<HTMLFormElement>) {
@@ -64,14 +59,12 @@ export default function EventsList({
       {events.length === 0 && (
         <div className="text-center py-12">
           <p className="text-muted text-lg">No events found.</p>
-          {isAuthenticated && (
-            <Link
-              href={"/events/create"}
-              className="btn-primary mt-4 inline-block"
-            >
-              Create the first event
-            </Link>
-          )}
+          <Link
+            href={"/events/create"}
+            className="btn-primary mt-4 inline-block"
+          >
+            Create the first event
+          </Link>
         </div>
       )}
 

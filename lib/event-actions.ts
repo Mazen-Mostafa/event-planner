@@ -1,7 +1,7 @@
 "use server";
 
-import { auth } from "@/auth";
 import { z } from "zod";
+import { getAppUser } from "./app-user";
 import { prisma } from "./prisma";
 import { revalidateTag } from "next/cache";
 import { RSVPStatus } from "./models";
@@ -18,11 +18,7 @@ const eventSchema = z.object({
 // eslint-disable-next-line
 export async function createEvent(_: any, formData: FormData) {
   try {
-    const session = await auth();
-
-    if (!session?.user?.id) {
-      return { success: false, error: "Not authenticated" };
-    }
+    const user = await getAppUser();
 
     const rawData = {
       title: formData.get("title"),
@@ -45,14 +41,14 @@ export async function createEvent(_: any, formData: FormData) {
           ? Number(validatedData.maxAttendees)
           : null,
         isPublic: validatedData.isPublic === "on",
-        userId: session.user.id,
+        userId: user.id,
       },
     });
 
     return { success: true, eventId: event.id };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.errors[0].message };
+      return { success: false, error: error.issues[0].message };
     }
 
     return { success: false, error: "Failed to create event", eventId: null };
@@ -61,11 +57,6 @@ export async function createEvent(_: any, formData: FormData) {
 
 export async function deleteEvent(eventId: string) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, error: "Not authenticated" };
-    }
-
     const existingEvent = await prisma.event.findUnique({
       where: { id: eventId },
     });
@@ -74,15 +65,11 @@ export async function deleteEvent(eventId: string) {
       return { success: false, error: "Event not found" };
     }
 
-    if (existingEvent.userId !== session.user.id) {
-      return { success: false, error: "Not authorized to delete this event" };
-    }
-
     await prisma.event.delete({
       where: { id: eventId },
     });
 
-    revalidateTag("events");
+    revalidateTag("events", "max");
     return { success: true };
   } catch (err) {
     console.error(err);
@@ -92,10 +79,7 @@ export async function deleteEvent(eventId: string) {
 
 export async function rsvpToEvent(eventId: string, status: RSVPStatus) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return { success: false, error: "Not authenticated" };
-    }
+    const user = await getAppUser();
 
     const existingEvent = await prisma.event.findUnique({
       where: { id: eventId },
@@ -112,7 +96,7 @@ export async function rsvpToEvent(eventId: string, status: RSVPStatus) {
     const existingRSVP = await prisma.rSVP.findUnique({
       where: {
         userId_eventId: {
-          userId: session.user.id,
+          userId: user.id,
           eventId,
         },
       },
@@ -122,7 +106,7 @@ export async function rsvpToEvent(eventId: string, status: RSVPStatus) {
       await prisma.rSVP.update({
         where: {
           userId_eventId: {
-            userId: session.user.id,
+            userId: user.id,
             eventId,
           },
         },
@@ -131,15 +115,15 @@ export async function rsvpToEvent(eventId: string, status: RSVPStatus) {
     } else {
       await prisma.rSVP.create({
         data: {
-          userId: session.user.id,
+          userId: user.id,
           eventId,
           status,
         },
       });
     }
 
-    revalidateTag("events");
-    revalidateTag(`event-${eventId}`);
+    revalidateTag("events", "max");
+    revalidateTag(`event-${eventId}`, "max");
     return { success: true };
   } catch (err) {
     console.error(err);

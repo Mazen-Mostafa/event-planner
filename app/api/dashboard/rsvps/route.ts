@@ -1,13 +1,9 @@
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
 
 export async function GET() {
   try {
-    const session = await auth();
-
-    const userRSVPs = await prisma.rSVP.findMany({
-      where: { userId: session?.user?.id },
+    const rsvps = await prisma.rSVP.findMany({
       include: {
         event: {
           include: {
@@ -20,7 +16,7 @@ export async function GET() {
       orderBy: { event: { date: "asc" } },
     });
 
-    return NextResponse.json(userRSVPs);
+    return NextResponse.json(rsvps);
   } catch (err) {
     console.error(err);
     return NextResponse.json(
