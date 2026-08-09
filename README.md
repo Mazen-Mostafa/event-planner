@@ -88,7 +88,7 @@ npm run dev
 
 ## Deployment link
 
-Live app: [https://event-planner-mazen14.vercel.app/events](https://event-planner-mazen14.vercel.app/events)
+Live app: [https://event-planner-mazen14.vercel.app](https://event-planner-mazen14.vercel.app)
 
 > If the preview URL asks you to log in to Vercel, open the project’s **Production** domain in the Vercel dashboard, or turn off Deployment Protection under **Settings → Deployment Protection**.
 
