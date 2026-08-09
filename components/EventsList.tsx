@@ -1,12 +1,12 @@
 "use client";
 
-import { Event } from "@/lib/models";
+import { EventListItem } from "@/lib/models";
 import { format } from "date-fns";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 
 interface EventsListProps {
-  events: Event[];
+  events: EventListItem[];
   searchParams: { search?: string; filter?: string };
 }
 

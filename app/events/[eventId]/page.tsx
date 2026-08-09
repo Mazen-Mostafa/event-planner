@@ -1,7 +1,7 @@
 import EventActions from "@/components/EventActions";
 import RSVPButtons from "@/components/RSVPButtons";
 import { getAppUser } from "@/lib/app-user";
-import { Event, RSVPStatus } from "@/lib/models";
+import { RSVPStatus } from "@/lib/models";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -38,10 +38,10 @@ export default async function EventPage({
     notFound();
   }
 
-  const event = eventRecord as Event;
+  const event = eventRecord;
 
   const userRSVP = event.rsvps.find((rsvp) => rsvp.userId === appUser.id);
-  const currentRSVP: RSVPStatus | undefined = userRSVP?.status;
+  const currentRSVP = userRSVP?.status as RSVPStatus | undefined;
 
   const isPast = new Date(event.date) < new Date();
 

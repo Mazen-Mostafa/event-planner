@@ -1,4 +1,3 @@
-import { EventRSVP } from "@/lib/models";
 import { prisma } from "@/lib/prisma";
 import { format } from "date-fns";
 import Link from "next/link";
@@ -40,10 +39,11 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div>
         <h1 className="text-3xl font-bold text-foreground">Dashboard</h1>
-        <p className="text-muted mt-2">Overview of events and RSVPs in your database</p>
+        <p className="text-muted mt-2">
+          Overview of events and RSVPs in your database
+        </p>
       </div>
 
-      {/* Quick Actions */}
       <div className="card p-6">
         <h2 className="text-xl font-semibold text-foreground mb-4">
           Quick Actions
@@ -58,7 +58,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Stats */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
         <div className="card p-6">
           <h3 className="text-lg font-semibold text-foreground">
@@ -84,7 +83,6 @@ export default async function DashboardPage() {
         </div>
       </div>
 
-      {/* Events */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-2xl font-bold text-foreground">Events</h2>
@@ -98,12 +96,12 @@ export default async function DashboardPage() {
 
         {userEvents.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {userEvents.map((event, key) => (
-              <div className="card p-6" key={key}>
+            {userEvents.map((event) => (
+              <div className="card p-6" key={event.id}>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
                   {event.title}
                 </h3>
-                <p className="text-muted mb-4"> {event.description}</p>
+                <p className="text-muted mb-4">{event.description}</p>
                 <div className="space-y-2 text-sm text-muted mb-4">
                   <div className="flex items-center">
                     <svg
@@ -155,16 +153,15 @@ export default async function DashboardPage() {
         )}
       </div>
 
-      {/* RSVPs */}
       <div className="space-y-4">
         <h2 className="text-2xl font-bold text-foreground">RSVPs</h2>
 
         {userRSVPs.length > 0 ? (
           <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {(userRSVPs as unknown as EventRSVP[]).map((rsvp, key) => (
-              <div className="card p-6" key={key}>
+            {userRSVPs.map((rsvp) => (
+              <div className="card p-6" key={rsvp.id}>
                 <h3 className="text-lg font-semibold text-foreground mb-2">
-                  {rsvp.event?.title}
+                  {rsvp.event.title}
                 </h3>
                 <span
                   className={`px-2 py-1 rounded-full text-xs font-medium ${
@@ -177,9 +174,7 @@ export default async function DashboardPage() {
                 >
                   {rsvp.status}
                 </span>
-                <p className="text-muted mb-4 mt-2">
-                  {rsvp.event?.description}
-                </p>
+                <p className="text-muted mb-4 mt-2">{rsvp.event.description}</p>
                 <div className="space-y-2 text-sm text-muted mb-4">
                   <div className="flex items-center">
                     <svg
@@ -195,7 +190,7 @@ export default async function DashboardPage() {
                         d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
                       />
                     </svg>
-                    {format(new Date(rsvp.event!.date), "PPP 'at' p")}
+                    {format(new Date(rsvp.event.date), "PPP 'at' p")}
                   </div>
 
                   <div className="flex items-center">
@@ -212,11 +207,11 @@ export default async function DashboardPage() {
                         d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
                       />
                     </svg>
-                    by {rsvp.event?.user.name}
+                    by {rsvp.event.user.name}
                   </div>
                 </div>
                 <Link
-                  href={`/events/${rsvp.event?.id}`}
+                  href={`/events/${rsvp.event.id}`}
                   className="btn-primary w-full text-center"
                 >
                   View Event

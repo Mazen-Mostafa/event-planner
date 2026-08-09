@@ -2,7 +2,6 @@
 
 import { rsvpToEvent } from "@/lib/event-actions";
 import { RSVPStatus } from "@/lib/models";
-import { RVSPStatus } from "@prisma/client";
 import { useState } from "react";
 
 interface RSVPButtonsProps {
@@ -46,7 +45,7 @@ export default function RSVPButtons({
     }
   }
 
-  async function handleRSVP(status: RVSPStatus) {
+  async function handleRSVP(status: RSVPStatus) {
     setIsLoading(true);
     try {
       const result = await rsvpToEvent(eventId, status);

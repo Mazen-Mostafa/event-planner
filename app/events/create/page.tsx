@@ -1,16 +1,21 @@
 "use client";
 
-import { createEvent } from "@/lib/event-actions";
+import { createEvent, CreateEventState } from "@/lib/event-actions";
 import { useRouter } from "next/navigation";
 import { useActionState, useEffect } from "react";
 
+const initialState: CreateEventState = {
+  success: false,
+  eventId: null,
+  error: "",
+};
+
 export default function CreateEventPage() {
   const router = useRouter();
-  const [state, formAction, isPending] = useActionState(createEvent, {
-    success: false,
-    eventId: null,
-    error: "",
-  });
+  const [state, formAction, isPending] = useActionState(
+    createEvent,
+    initialState
+  );
 
   useEffect(() => {
     if (state.success && state.eventId) {

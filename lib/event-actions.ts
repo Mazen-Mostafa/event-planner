@@ -6,6 +6,12 @@ import { prisma } from "./prisma";
 import { revalidateTag } from "next/cache";
 import { RSVPStatus } from "./models";
 
+export type CreateEventState = {
+  success: boolean;
+  eventId: string | null;
+  error: string;
+};
+
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -15,8 +21,10 @@ const eventSchema = z.object({
   isPublic: z.string().optional(),
 });
 
-// eslint-disable-next-line
-export async function createEvent(_: any, formData: FormData) {
+export async function createEvent(
+  _prevState: CreateEventState,
+  formData: FormData
+): Promise<CreateEventState> {
   try {
     const user = await getAppUser();
 
@@ -45,10 +53,14 @@ export async function createEvent(_: any, formData: FormData) {
       },
     });
 
-    return { success: true, eventId: event.id };
+    return { success: true, eventId: event.id, error: "" };
   } catch (error) {
     if (error instanceof z.ZodError) {
-      return { success: false, error: error.issues[0].message };
+      return {
+        success: false,
+        eventId: null,
+        error: error.issues[0]?.message ?? "Invalid input",
+      };
     }
 
     return { success: false, error: "Failed to create event", eventId: null };

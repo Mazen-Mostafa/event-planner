@@ -1,5 +1,4 @@
 import EventsList from "@/components/EventsList";
-import { Event } from "@/lib/models";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { connection } from "next/server";
@@ -55,7 +54,7 @@ export default async function EventsPage({
         </Link>
       </div>
 
-      <EventsList events={events as unknown as Event[]} searchParams={sp} />
+      <EventsList events={events} searchParams={sp} />
     </div>
   );
 }
