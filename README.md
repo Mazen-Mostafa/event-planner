@@ -1,40 +1,126 @@
-<<<<<<< HEAD
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Event Planner
 
-## Getting Started
+## Project overview
 
-First, run the development server:
+Event Planner is a full-stack web application for creating, browsing, and managing events. Users can publish events with details like date, location, and capacity, RSVP to public events, and view an overview of all events and RSVPs on a dashboard.
+
+The app connects to a **Neon Postgres** database through **Prisma**. There is no authentication layer — create, edit, delete, and RSVP actions use a shared app user in the database so the focus stays on core event management features.
+
+## Features
+
+- Browse all events with search and upcoming / past filters
+- Create new events (title, description, date & time, location, max attendees, public/private)
+- View event details and attendee RSVP lists
+- Edit and delete existing events
+- RSVP to public events as **Going**, **Maybe**, or **Not Going**
+- Dashboard with totals, upcoming/past stats, and lists of events and RSVPs
+- Form validation with **Zod** on create and update
+
+## Technologies used
+
+- **Next.js 16** (App Router) — frontend and server actions / API routes
+- **React 19** — UI components
+- **TypeScript** — type-safe application code
+- **Tailwind CSS 4** — styling
+- **Prisma 7** — ORM
+- **Neon Postgres** — hosted PostgreSQL database
+- **`@prisma/adapter-neon`** — serverless-friendly database driver for Vercel
+- **Zod** — input validation
+- **date-fns** — date formatting
+- **Vercel** — hosting and deployment
+
+## Setup / install instructions
+
+### Prerequisites
+
+- Node.js 20 or later
+- npm
+- A Neon Postgres database ([console.neon.tech](https://console.neon.tech))
+
+### Steps
+
+1. **Clone the repository**
+
+```bash
+git clone https://github.com/Mazen-Mostafa/event-planner.git
+cd event-planner
+```
+
+2. **Install dependencies**
+
+```bash
+npm install
+```
+
+3. **Configure environment variables**
+
+Create a `.env` file in the project root:
+
+```env
+DATABASE_URL="postgresql://USER:PASSWORD@HOST-pooler.REGION.aws.neon.tech/neondb?sslmode=require"
+```
+
+Use the **pooled** Neon connection string (hostname includes `-pooler`). Prefer `sslmode=require`. You can omit `channel_binding=require`.
+
+4. **Sync the database schema**
+
+```bash
+npx prisma db push
+```
+
+5. **Start the development server**
 
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+6. Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+### Useful commands
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Command | Description |
+| --- | --- |
+| `npm run dev` | Run the app in development mode |
+| `npm run build` | Generate Prisma Client and build for production |
+| `npm start` | Run the production build |
+| `npm run lint` | Run ESLint |
+| `npx prisma studio` | Browse database data in the browser |
 
-## Learn More
+## Deployment link
 
-To learn more about Next.js, take a look at the following resources:
+Live app: [https://event-planner-8ylm3mupa-mazen14.vercel.app](https://event-planner-8ylm3mupa-mazen14.vercel.app)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+> If the preview URL asks you to log in to Vercel, open the project’s **Production** domain in the Vercel dashboard, or turn off Deployment Protection under **Settings → Deployment Protection**.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+### Deploying your own instance
 
-## Deploy on Vercel
+1. Import the GitHub repo into [Vercel](https://vercel.com).
+2. Add `DATABASE_URL` (Neon pooled connection string) for Production and Preview.
+3. Deploy. After changing env vars, redeploy so they apply.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+## Any other relevant information
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
-=======
-# event-planner
->>>>>>> d297a90f21ec9a1164b87a0f3f45a22e3a2c6b37
+### How identity works
+
+The app does **not** use login or OAuth. Creates and RSVPs are tied to a shared database user (`app@event-planner.local`). The dashboard shows all events and RSVPs stored in the connected Neon database.
+
+### Data models
+
+- **User** — organizer / RSVP identity
+- **Event** — title, description, date, location, max attendees, public flag
+- **RSVP** — status (`GOING` | `MAYBE` | `NOT_GOING`), unique per user and event
+
+### Project structure
+
+```
+app/           # Pages and API routes
+components/    # UI components (navbar, lists, forms, RSVP)
+lib/           # Prisma client, server actions, models
+prisma/        # Prisma schema and migrations
+```
+
+### Notes
+
+- Keep `.env` out of git; never commit database credentials.
+- `postinstall` runs `prisma generate` so Vercel builds get a fresh Prisma Client.
+- Zod validates event create/update payloads on the server before writing to the database.
