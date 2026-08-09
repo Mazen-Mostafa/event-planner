@@ -78,17 +78,17 @@ npm run dev
 
 ### Useful commands
 
-| Command | Description |
-| --- | --- |
-| `npm run dev` | Run the app in development mode |
-| `npm run build` | Generate Prisma Client and build for production |
-| `npm start` | Run the production build |
-| `npm run lint` | Run ESLint |
-| `npx prisma studio` | Browse database data in the browser |
+| Command             | Description                                     |
+| ------------------- | ----------------------------------------------- |
+| `npm run dev`       | Run the app in development mode                 |
+| `npm run build`     | Generate Prisma Client and build for production |
+| `npm start`         | Run the production build                        |
+| `npm run lint`      | Run ESLint                                      |
+| `npx prisma studio` | Browse database data in the browser             |
 
 ## Deployment link
 
-Live app: [https://event-planner-8ylm3mupa-mazen14.vercel.app](https://event-planner-8ylm3mupa-mazen14.vercel.app)
+Live app: [https://event-planner-mazen14.vercel.app/events](https://event-planner-mazen14.vercel.app/events)
 
 > If the preview URL asks you to log in to Vercel, open the project’s **Production** domain in the Vercel dashboard, or turn off Deployment Protection under **Settings → Deployment Protection**.
 
