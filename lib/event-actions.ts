@@ -12,6 +12,8 @@ export type CreateEventState = {
   error: string;
 };
 
+export type UpdateEventState = CreateEventState;
+
 const eventSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
@@ -64,6 +66,65 @@ export async function createEvent(
     }
 
     return { success: false, error: "Failed to create event", eventId: null };
+  }
+}
+
+export async function updateEvent(
+  _prevState: UpdateEventState,
+  formData: FormData
+): Promise<UpdateEventState> {
+  try {
+    const eventId = String(formData.get("eventId") ?? "");
+    if (!eventId) {
+      return { success: false, eventId: null, error: "Event id is required" };
+    }
+
+    const existingEvent = await prisma.event.findUnique({
+      where: { id: eventId },
+    });
+
+    if (!existingEvent) {
+      return { success: false, eventId: null, error: "Event not found" };
+    }
+
+    const rawData = {
+      title: formData.get("title"),
+      description: formData.get("description"),
+      date: formData.get("date"),
+      location: formData.get("location"),
+      maxAttendees: formData.get("maxAttendees"),
+      isPublic: formData.get("isPublic"),
+    };
+
+    const validatedData = eventSchema.parse(rawData);
+
+    const event = await prisma.event.update({
+      where: { id: eventId },
+      data: {
+        title: validatedData.title,
+        description: validatedData.description,
+        date: new Date(validatedData.date),
+        location: validatedData.location,
+        maxAttendees: validatedData.maxAttendees
+          ? Number(validatedData.maxAttendees)
+          : null,
+        isPublic: validatedData.isPublic === "on",
+      },
+    });
+
+    revalidateTag("events", "max");
+    revalidateTag(`event-${eventId}`, "max");
+    return { success: true, eventId: event.id, error: "" };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      return {
+        success: false,
+        eventId: null,
+        error: error.issues[0]?.message ?? "Invalid input",
+      };
+    }
+
+    return { success: false, error: "Failed to update event", eventId: null };
   }
 }
 
